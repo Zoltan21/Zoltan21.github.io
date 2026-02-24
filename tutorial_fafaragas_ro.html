@@ -1,0 +1,880 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <a href="indexro.html">← Înapoi la pagina principală</a>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sculptură motiv de poartă secuiască – mini tutorial</title>
+
+  <style>
+    :root{
+      --bg: #f6f3ea;
+      --paper: #fbf8f1;
+      --ink: #1f1f1f;
+      --muted: #5a5a5a;
+      --line: rgba(0,0,0,.12);
+      --line-strong: rgba(0,0,0,.18);
+      --shadow: 0 12px 30px rgba(0,0,0,.08);
+      --shadow-soft: 0 8px 18px rgba(0,0,0,.06);
+      --radius: 18px;
+      --radius-sm: 14px;
+      --pad: clamp(16px, 3vw, 28px);
+      --max: 1100px;
+    }
+
+    *{ box-sizing: border-box; }
+    html{ scroll-behavior: smooth; }
+    body{
+      margin: 0;
+      color: var(--ink);
+      background: radial-gradient(1200px 600px at 20% 0%, rgba(0,0,0,.04), transparent 60%),
+                  radial-gradient(900px 600px at 80% 10%, rgba(0,0,0,.035), transparent 55%),
+                  var(--bg);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      line-height: 1.55;
+    }
+
+    /* subtle paper noise */
+    body:before{
+      content:"";
+      position: fixed;
+      inset: 0;
+      pointer-events:none;
+      background-image:
+        radial-gradient(circle at 10% 10%, rgba(0,0,0,.03) 0 1px, transparent 1px),
+        radial-gradient(circle at 80% 30%, rgba(0,0,0,.02) 0 1px, transparent 1px),
+        radial-gradient(circle at 30% 70%, rgba(0,0,0,.02) 0 1px, transparent 1px);
+      background-size: 120px 120px, 160px 160px, 140px 140px;
+      opacity: .35;
+      mix-blend-mode: multiply;
+    }
+
+    a{ color: inherit; text-decoration: none; }
+    .wrap{ width: min(var(--max), calc(100% - 2*var(--pad))); margin: 0 auto; }
+
+    /* top nav */
+    .topbar{
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+      background: color-mix(in srgb, var(--bg) 80%, transparent);
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar .wrap{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      padding: 10px 0;
+      gap: 14px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      font-weight: 750;
+      letter-spacing:.2px;
+      white-space: nowrap;
+    }
+    .brand .dot{
+      width: 12px; height: 12px;
+      border-radius: 999px;
+      background: var(--ink);
+      box-shadow: 0 0 0 4px rgba(0,0,0,.06);
+    }
+    nav ul{
+      list-style:none;
+      margin:0;
+      padding:0;
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    nav a{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: color-mix(in srgb, var(--paper) 85%, transparent);
+      box-shadow: 0 4px 10px rgba(0,0,0,.04);
+      font-size: 14px;
+    }
+    nav a:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(0,0,0,.06);
+    }
+
+    /* hero */
+    header.hero{
+      padding: clamp(26px, 4vw, 44px) 0 18px;
+    }
+    .hero-grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: clamp(14px, 2vw, 18px);
+      align-items: stretch;
+    }
+    @media (max-width: 900px){
+      .hero-grid{ grid-template-columns: 1fr; }
+    }
+    .paper{
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+    .paper:before{
+      content:"";
+      position:absolute;
+      inset:-30px;
+      border-radius: calc(var(--radius) + 22px);
+      border: 2px dashed rgba(0,0,0,.08);
+      transform: rotate(-1.2deg);
+      pointer-events:none;
+    }
+    .hero-left{ padding: var(--pad); }
+    .kicker{
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.03);
+      font-size: 13px;
+      color: var(--muted);
+      width: fit-content;
+    }
+    h1{
+      margin: 12px 0 8px;
+      font-size: clamp(26px, 3.2vw, 40px);
+      line-height: 1.1;
+      letter-spacing: -.5px;
+    }
+    .lead{
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px;
+      max-width: 62ch;
+    }
+    .chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .chip{
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.55);
+      font-size: 13px;
+    }
+
+    .hero-right{
+      display:grid;
+      grid-template-rows: auto 1fr;
+    }
+    .mini-gallery{
+      padding: 12px;
+      display:grid;
+      gap: 10px;
+    }
+    .mini-gallery .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .mini-gallery figure{
+      margin:0;
+      border-radius: 14px;
+      overflow:hidden;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.02);
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      cursor: zoom-in;
+    }
+    .mini-gallery img{
+      display:block;
+      width:100%;
+      height: 150px;
+      object-fit: cover;
+      filter: contrast(1.02) saturate(1.02);
+    }
+    .mini-gallery figcaption{
+      position:absolute;
+      left: 10px;
+      bottom: 10px;
+      background: rgba(251,248,241,.86);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: var(--muted);
+      backdrop-filter: blur(6px);
+    }
+    .note{
+      padding: 0 12px 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* section heading */
+    section{ padding: 22px 0; }
+    .sec-head{
+      display:flex;
+      align-items:flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .sec-head h2{
+      margin: 0;
+      font-size: clamp(18px, 2.2vw, 26px);
+      letter-spacing: -.2px;
+      position: relative;
+      width: fit-content;
+    }
+    .sec-head h2:after{
+      content:"";
+      position:absolute;
+      left: 0;
+      right: 0;
+      bottom: -6px;
+      height: 10px;
+      background: rgba(0,0,0,.06);
+      border-radius: 999px;
+      transform: rotate(-1deg);
+      z-index: -1;
+    }
+    .sec-head p{
+      margin:0;
+      color: var(--muted);
+      font-size: 14px;
+      max-width: 60ch;
+    }
+
+    /* tools */
+    .tools{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    @media (max-width: 980px){
+      .tools{ grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 540px){
+      .tools{ grid-template-columns: 1fr; }
+    }
+    .tool-card{
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--line);
+      background: var(--paper);
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+    }
+    .tool-card:before{
+      content:"";
+      position:absolute;
+      inset: -18px;
+      border: 2px dashed rgba(0,0,0,.07);
+      border-radius: 22px;
+      transform: rotate(.8deg);
+      pointer-events:none;
+    }
+    .tool-card .img{
+      border-radius: 14px;
+      overflow:hidden;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.03);
+      cursor: zoom-in;
+    }
+    .tool-card img{
+      width:100%;
+      height: 150px;
+      object-fit: cover;
+      display:block;
+    }
+    .tool-card h3{
+      margin: 10px 0 4px;
+      font-size: 16px;
+    }
+    .tool-card p{
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* timeline steps */
+    .steps{
+      display:grid;
+      gap: 12px;
+    }
+    .step{
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: var(--paper);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+      position: relative;
+    }
+    .step:before{
+      content:"";
+      position:absolute;
+      inset:-26px;
+      border: 2px dashed rgba(0,0,0,.07);
+      border-radius: calc(var(--radius) + 18px);
+      transform: rotate(-.9deg);
+      pointer-events:none;
+    }
+    .step-top{
+      display:flex;
+      gap: 12px;
+      padding: 14px 14px 10px;
+      align-items:flex-start;
+      flex-wrap: wrap;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width: 38px; height: 38px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.03);
+      font-weight: 800;
+    }
+    .step h3{
+      margin: 0;
+      font-size: 18px;
+    }
+    .step p{
+      margin: 6px 0 0;
+      color: var(--muted);
+      max-width: 85ch;
+    }
+    .hint-row{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .hint{
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.55);
+      color: var(--muted);
+    }
+
+    /* scroll gallery inside step */
+    .strip{
+      display:flex;
+      gap: 10px;
+      padding: 12px 14px 16px;
+      overflow:auto;
+      scroll-snap-type: x mandatory;
+      border-top: 1px solid var(--line);
+      background: linear-gradient(to bottom, rgba(0,0,0,.02), transparent);
+    }
+    .strip::-webkit-scrollbar{ height: 10px; }
+    .strip::-webkit-scrollbar-thumb{
+      background: rgba(0,0,0,.12);
+      border-radius: 999px;
+    }
+    .shot{
+      flex: 0 0 auto;
+      width: min(320px, 78vw);
+      border-radius: 16px;
+      overflow:hidden;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      scroll-snap-align: start;
+      background: rgba(0,0,0,.03);
+      cursor: zoom-in;
+      position: relative;
+    }
+    .shot img{
+      width:100%;
+      height: 190px;
+      object-fit: cover;
+      display:block;
+    }
+    .shot span{
+      position:absolute;
+      left: 10px;
+      bottom: 10px;
+      background: rgba(251,248,241,.86);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: var(--muted);
+      backdrop-filter: blur(6px);
+    }
+
+    /* footer */
+    footer{
+      padding: 24px 0 46px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .footer-card{
+      padding: var(--pad);
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: var(--paper);
+      box-shadow: var(--shadow-soft);
+    }
+
+    /* lightbox */
+    .lightbox{
+      position: fixed;
+      inset: 0;
+      display:none;
+      place-items: center;
+      background: rgba(0,0,0,.72);
+      z-index: 100;
+      padding: 18px;
+    }
+    .lightbox.open{ display:grid; }
+    .lightbox-inner{
+      width: min(1080px, 96vw);
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.2);
+      box-shadow: 0 30px 90px rgba(0,0,0,.35);
+      background: rgba(0,0,0,.2);
+      position: relative;
+    }
+    .lightbox img{
+      width:100%;
+      height: auto;
+      display:block;
+      background: #111;
+    }
+    .lb-bar{
+      position:absolute;
+      top: 10px;
+      right: 10px;
+      display:flex;
+      gap: 8px;
+    }
+    .lb-btn{
+      appearance:none;
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(0,0,0,.35);
+      color: white;
+      padding: 8px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 650;
+    }
+    .lb-btn:hover{ background: rgba(0,0,0,.5); }
+  </style>
+</head>
+
+<body>
+
+  <div class="topbar">
+    <div class="wrap">
+      <div class="brand">
+        <span class="dot" aria-hidden="true"></span>
+        <span>Sculptură poartă secuiască</span>
+      </div>
+
+      <nav aria-label="Navigare în pagină">
+        <ul>
+          <li><a href="#eszközök">Unelte</a></li>
+          <li><a href="#anyag">Lemn</a></li>
+          <li><a href="#folyamat">Proces</a></li>
+          <li><a href="#galeria">Galerie</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div class="wrap hero-grid">
+      <div class="paper hero-left">
+        <!-- <div class="kicker">Modele de poartă secuiască</div> -->
+        <h1>Sculptură motiv de poartă</h1>
+        <p class="lead">
+            În această pagină scurtă de tutorial trecem mai întâi prin uneltele necesare și tipul de lemn,
+            apoi prezentăm pas cu pas procesul de sculptare:
+            de la planificare și trasare, prin „baterea” conturului, până la decupare.
+        </p>
+
+        <!-- <div class="chips" aria-label="Informații cheie">
+          <div class="chip">Unelte: butikó (ciocan de lemn), daltă cu mâner de lemn, daltă metalică, ciocan</div>
+          <div class="chip">Lemn: stejar / arin (mai ușor de sculptat)</div>
+          <div class="chip">Sfat: modelul „pornește de undeva și se termină undeva”</div>
+        </div> -->
+      </div>
+
+      <div class="paper hero-right">
+        <div class="mini-gallery" id="galeria">
+          <div class="grid" aria-label="Imagini de previzualizare rapidă">
+
+            <figure class="zoomable" data-full="KolikKepek/tutorial/IMG_0329.JPG">
+                <img src="KolikKepek/tutorial/IMG_0329.JPG" alt="Trasarea modelului pe scândură" loading="lazy" />
+                <figcaption>Trasare</figcaption>
+              </figure>
+
+              <figure class="zoomable" data-full="KolikKepek/tutorial/IMG_0319.JPG">
+                <img src="KolikKepek/tutorial/IMG_0319.JPG" alt="Sculptură în lucru, pe masă" loading="lazy" />
+                <figcaption>Bătaie contur</figcaption>
+              </figure>
+
+              <figure class="zoomable" data-full="KolikKepek/tutorial/IMG_0577.JPG">
+                <img src="KolikKepek/tutorial/IMG_0577.JPG" alt="Decupare cu dalta, în jurul modelului" loading="lazy" />
+                <figcaption>Decupare</figcaption>
+              </figure>
+
+            <figure class="zoomable" data-full="KolikKepek/tutorial/IMG_1171.JPG">
+              <img src="KolikKepek/tutorial/IMG_1171.JPG" alt="Exemplu de motiv colorat pe o suprafață sculptată" loading="lazy" />
+              <figcaption>Rezultatul final</figcaption>
+            </figure>
+
+          </div>
+        </div>
+
+        <div class="note">
+          Apasă pe imagini ca să le vezi mărite.
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <section id="eszközök">
+      <div class="sec-head">
+        <h2>Unelte</h2>
+        <!-- <p>Setul de bază: butikó (ciocan de lemn), daltă cu mâner de lemn, daltă metalică (pentru contur), ciocan.</p> -->
+      </div>
+
+      <div class="tools" aria-label="Carduri cu unelte">
+
+        <article class="tool-card">
+          <div class="img zoomable" data-full="KolikKepek/tutorial/IMG_0319.JPG">
+            <img src="KolikKepek/tutorial/IMG_0319.JPG" alt="Bătaia daltei metalice cu ciocanul" loading="lazy" />
+          </div>
+          <h3>Daltă metalică (pentru contur)</h3>
+          <p>Pentru fiecare linie alegem dalta potrivită, apoi batem liniile în lemn cu ciocanul, fixând astfel conturul modelului.</p>
+        </article>
+
+        <article class="tool-card">
+          <div class="img zoomable" data-full="KolikKepek/tutorial/IMG_0317.JPG">
+            <img src="KolikKepek/tutorial/IMG_0317.JPG" alt="Lovire în timpul sculptării – ciocan și daltă" loading="lazy" />
+          </div>
+          <h3>Ciocan</h3>
+          <p>Folosit pentru a bate dălțile în timpul lucrului. Fier pe fier.</p>
+        </article>
+        
+        <article class="tool-card">
+            <div class="img zoomable" data-full="KolikKepek/tutorial/IMG_1239.JPG">
+              <img src="KolikKepek/tutorial/IMG_1239.JPG" alt="Butikó – ciocan de lemn, de aproape" loading="lazy" />
+            </div>
+            <h3>Butikó</h3>
+            <p>Unealtă de lovire din lemn pentru lovituri „mai moi”, mai ales pentru dălți cu mâner de lemn. Lemn pe lemn.</p>
+          </article>
+  
+          <article class="tool-card">
+            <div class="img zoomable" data-full="KolikKepek/tutorial/IMG_1081.JPG">
+              <img src="KolikKepek/tutorial/IMG_1081.JPG" alt="Daltă cu mâner de lemn lângă piesă" loading="lazy" />
+            </div>
+            <h3>Daltă cu mâner de lemn</h3>
+            <p>O folosim în principal la decuparea fundalului. Datorită formei, se controlează bine și permite o sculptură precisă.</p>
+          </article>
+      </div>
+    </section>
+
+    <section id="anyag">
+      <div class="sec-head">
+        <h2>Piesa: scândura</h2>
+        <!-- <p>Stejar sau arin. Arinul se sculptează mai ușor.</p> -->
+      </div>
+
+      <div class="paper" style="padding: var(--pad);">
+        <div style="display:grid; grid-template-columns: 1.1fr .9fr; gap: 14px; align-items:start;">
+          <div>
+            <h3 style="margin:0 0 8px;">La ce să fii atent</h3>
+            <ul style="margin:0; padding-left: 18px; color: var(--muted);">
+              <li>Fixează lemnul stabil (cu clemă, pe masă).</li>
+              <li>Modelul „pornește de undeva și se termină undeva” — să aibă o închidere clară.</li>
+              <li>Marginea cu scoarță e decorativă, dar ai grijă să nu „rupă” linia în timpul lucrului.</li>
+            </ul>
+          </div>
+
+          <div class="zoomable" data-full="KolikKepek/tutorial/IMG_0541.JPG" style="border:1px solid var(--line); border-radius: 16px; overflow:hidden; box-shadow: var(--shadow-soft); cursor: zoom-in;">
+            <img src="KolikKepek/tutorial/IMG_0541.JPG" alt="Trasarea modelului pe scândură, ținută în mână" loading="lazy" style="display:block; width:100%; height: 220px; object-fit: cover;">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="folyamat">
+      <div class="sec-head">
+        <h2>Procesul</h2>
+        <!-- <p>Pas cu pas – cu exemple foto pentru fiecare parte.</p> -->
+      </div>
+
+      <div class="steps" aria-label="Pașii procesului">
+
+        <!-- Step 1 -->
+        <article class="step">
+          <div class="step-top">
+            <div class="badge">1</div>
+            <div>
+              <h3>Planificarea modelului</h3>
+              <p>
+                Mai întâi ne hotărâm ce vrem să sculptăm. E bine ca linia modelului să „conducă”, și
+                să pornească conștient din ceva și să ajungă în ceva.
+              </p>
+              <div class="hint-row">
+                <span class="hint">sfat: începe cu forme simple</span>
+                <span class="hint">sfat: pe hârtie iterezi mai repede</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="strip" aria-label="Imagini pentru pasul 1">
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0119.JPG">
+              <img src="KolikKepek/tutorial/IMG_0119.JPG" alt="Planificarea modelului pe hârtie cu creion" loading="lazy" />
+              <span>Planificare</span>
+            </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0134_crop.png">
+              <img src="KolikKepek/tutorial/IMG_0134_crop.png" alt="Comparație între desen și exemplu sculptat" loading="lazy" />
+              <span>Model + exemplu</span>
+            </figure>
+
+          </div>
+        </article>
+
+        <!-- Step 2 -->
+        <article class="step">
+          <div class="step-top">
+            <div class="badge">2</div>
+            <div>
+              <h3>Alegerea lemnului și trasarea modelului</h3>
+              <p>
+                Alegem scândura (stejar/arin), apoi trasăm modelul pe lemn.
+                Merită să pui mai întâi liniile principale „lejer”, apoi să le precizezi.
+              </p>
+              <div class="hint-row">
+                <span class="hint">sfat: trasează fin, nu zgâria</span>
+                <!-- <span class="hint">sfat: fixează lemnul să nu se miște</span> -->
+              </div>
+            </div>
+          </div>
+
+          <div class="strip" aria-label="Imagini pentru pasul 2">
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0541.JPG">
+                <img src="KolikKepek/tutorial/IMG_0541.JPG" alt="Trasare pe scândură, ținută în mână" loading="lazy" />
+                <span>Direcția liniei</span>
+              </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0278_crop.png">
+                <img src="KolikKepek/tutorial/IMG_0278_crop.png" alt="Detaliu de aproape al modelului trasat" loading="lazy" />
+                <span>Detaliu</span>
+              </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0291.JPG">
+              <img src="KolikKepek/tutorial/IMG_0291.JPG" alt="Motiv de floare trasat pe lemn" loading="lazy" />
+              <span>Schiță pe lemn</span>
+            </figure>
+          </div>
+        </article>
+
+        <!-- Step 3 -->
+        <article class="step">
+          <div class="step-top">
+            <div class="badge">3</div>
+            <div>
+              <h3>„Baterea” conturului cu dalta metalică</h3>
+              <p>
+                Cu dalta de contur (daltă metalică) și cu ajutorul ciocanului urmăm
+                liniile desenului. Aici scopul este încă <strong>fixarea conturului</strong>.
+              </p>
+              <div class="hint-row">
+                <span class="hint">sfat: lovituri scurte, controlate</span>
+                <!-- <span class="hint">sfat: încetinește în curbe</span> -->
+              </div>
+            </div>
+          </div>
+
+          <div class="strip" aria-label="Imagini pentru pasul 3">
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0319.JPG">
+              <img src="KolikKepek/tutorial/IMG_0319.JPG" alt="Baterea daltei metalice în model" loading="lazy" />
+              <span>Punem dalta pe linie</span>
+            </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0317.JPG">
+                <img src="KolikKepek/tutorial/IMG_0317.JPG" alt="Baterea conturului în model" loading="lazy" />
+                <span>Lovituri pe contur</span>
+              </figure>
+          </div>
+        </article>
+
+        <!-- Step 4 -->
+        <article class="step">
+          <div class="step-top">
+            <div class="badge">4</div>
+            <div>
+              <h3>Decuparea cu dalta – reliefarea modelului</h3>
+              <p>
+                După ce conturul este complet, urmează „decuparea”: scoatem zonele din jurul modelului,
+                ca motivul să iasă în relief din lemn.
+              </p>
+              <div class="hint-row">
+                <span class="hint">sfat: decupează pe straturi, nu adânc dintr-o dată</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="strip" aria-label="Imagini pentru pasul 4">
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0449.JPG">
+              <img src="KolikKepek/tutorial/IMG_0449.JPG" alt="Decupare în lucru, pe mai multe bucăți" loading="lazy" />
+              <span>Decupare</span>
+            </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0576.JPG">
+              <img src="KolikKepek/tutorial/IMG_0576.JPG" alt="Detaliu daltă și așchii" loading="lazy" />
+              <span>Detaliu</span>
+            </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0637.JPG">
+              <img src="KolikKepek/tutorial/IMG_0637.JPG" alt="Decupare lângă contur" loading="lazy" />
+              <span>De-a lungul conturului</span>
+            </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0644.JPG">
+              <img src="KolikKepek/tutorial/IMG_0644.JPG" alt="Scoaterea fundalului, modelarea suprafeței" loading="lazy" />
+              <span>Fundal</span>
+            </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0686.JPG">
+              <img src="KolikKepek/tutorial/IMG_0686.JPG" alt="Prelucrarea motivului cu dalta" loading="lazy" />
+              <span>Prelucrare</span>
+            </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0577.JPG">
+              <img src="KolikKepek/tutorial/IMG_0577.JPG" alt="Model în lucru, deja iese în relief" loading="lazy" />
+              <span>Reliefare</span>
+            </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0533.JPG">
+              <img src="KolikKepek/tutorial/IMG_0533.JPG" alt="Finisare pe suprafață, netezire" loading="lazy" />
+              <span>Finisare</span>
+            </figure>
+          </div>
+        </article>
+
+        <!-- Step 5 -->
+        <article class="step">
+            <div class="step-top">
+            <div class="badge">5</div>
+            <div>
+                <h3>Motive – rezultatul final</h3>
+                <p>
+                  Când am decupat cu grijă toate zonele și modelul iese frumos în relief, am terminat.
+                  Opțional, sculptura poate fi și vopsită – așa cum era obișnuit și la porțile secuiești vechi.
+                </p>
+                <div class="hint-row">
+                  <span class="hint">Sfat: vopsește vrejurile cu verde.</span>
+                  <span class="hint">Sfat: laleaua este roșie.</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="strip" aria-label="Imagini pentru pasul 5">
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_1171.JPG">
+                <img src="KolikKepek/tutorial/IMG_1171.JPG" alt="Motiv sculptat finalizat (exemplu 1)" loading="lazy" />
+            </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_1253.JPG">
+                <img src="KolikKepek/tutorial/IMG_1253.JPG" alt="Motiv sculptat finalizat (exemplu 2)" loading="lazy" />
+            </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_1305.JPG">
+                <img src="KolikKepek/tutorial/IMG_1305.JPG" alt="Motiv sculptat finalizat (exemplu 3)" loading="lazy" />
+            </figure>
+            </div>
+        </article>
+      </div>
+    </section>
+
+    <section aria-label="Bloc galerie extra">
+      <div class="sec-head">
+        <h2>Galerie extra</h2>
+        <!-- <p>Câteva instantanee în plus: unelte, atmosferă, lucru în desfășurare.</p> -->
+      </div>
+
+      <div class="strip" id="galeria2">
+        <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0451.JPG">
+          <img src="KolikKepek/tutorial/IMG_0451.JPG" alt="Sculptură cu butikó și daltă" loading="lazy" />
+        </figure>
+        <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0637.JPG">
+          <img src="KolikKepek/tutorial/IMG_0637.JPG" alt="Folosirea ciocanului și a daltei în lucru" loading="lazy" />
+        </figure>
+        <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0686.JPG">
+          <img src="KolikKepek/tutorial/IMG_0686.JPG" alt="Model colorat pe suprafață sculptată" loading="lazy" />
+        </figure>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <div class="lightbox-inner" role="dialog" aria-label="Vizualizare imagine">
+      <div class="lb-bar">
+        <button class="lb-btn" id="lbClose" type="button">Închide</button>
+      </div>
+      <img id="lbImg" alt="" />
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const lb = document.getElementById('lightbox');
+      const lbImg = document.getElementById('lbImg');
+      const lbClose = document.getElementById('lbClose');
+
+      function openLB(src, alt){
+        lbImg.src = src;
+        lbImg.alt = alt || '';
+        lb.classList.add('open');
+        lb.setAttribute('aria-hidden','false');
+      }
+      function closeLB(){
+        lb.classList.remove('open');
+        lb.setAttribute('aria-hidden','true');
+        lbImg.src = '';
+        lbImg.alt = '';
+      }
+
+      document.querySelectorAll('.zoomable').forEach(el => {
+        el.addEventListener('click', () => {
+          const src = el.getAttribute('data-full');
+          const img = el.querySelector('img');
+          openLB(src, img ? img.alt : '');
+        });
+        el.addEventListener('keydown', (e) => {
+          if(e.key === 'Enter' || e.key === ' ') el.click();
+        });
+        el.tabIndex = 0;
+        el.style.outline = 'none';
+      });
+
+      lb.addEventListener('click', (e) => {
+        if(e.target === lb) closeLB();
+      });
+      lbClose.addEventListener('click', closeLB);
+      window.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape' && lb.classList.contains('open')) closeLB();
+      });
+    })();
+  </script>
+
+</body>
+</html>

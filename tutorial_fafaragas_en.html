@@ -1,0 +1,897 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <a href="indexen.html">← Back to homepage</a>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Székely Gate Pattern Carving – mini tutorial</title>
+
+  <style>
+    :root{
+      --bg: #f6f3ea;
+      --paper: #fbf8f1;
+      --ink: #1f1f1f;
+      --muted: #5a5a5a;
+      --line: rgba(0,0,0,.12);
+      --line-strong: rgba(0,0,0,.18);
+      --shadow: 0 12px 30px rgba(0,0,0,.08);
+      --shadow-soft: 0 8px 18px rgba(0,0,0,.06);
+      --radius: 18px;
+      --radius-sm: 14px;
+      --pad: clamp(16px, 3vw, 28px);
+      --max: 1100px;
+    }
+
+    *{ box-sizing: border-box; }
+    html{ scroll-behavior: smooth; }
+    body{
+      margin: 0;
+      color: var(--ink);
+      background: radial-gradient(1200px 600px at 20% 0%, rgba(0,0,0,.04), transparent 60%),
+                  radial-gradient(900px 600px at 80% 10%, rgba(0,0,0,.035), transparent 55%),
+                  var(--bg);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      line-height: 1.55;
+    }
+
+    /* subtle paper noise */
+    body:before{
+      content:"";
+      position: fixed;
+      inset: 0;
+      pointer-events:none;
+      background-image:
+        radial-gradient(circle at 10% 10%, rgba(0,0,0,.03) 0 1px, transparent 1px),
+        radial-gradient(circle at 80% 30%, rgba(0,0,0,.02) 0 1px, transparent 1px),
+        radial-gradient(circle at 30% 70%, rgba(0,0,0,.02) 0 1px, transparent 1px);
+      background-size: 120px 120px, 160px 160px, 140px 140px;
+      opacity: .35;
+      mix-blend-mode: multiply;
+    }
+
+    a{ color: inherit; text-decoration: none; }
+    .wrap{ width: min(var(--max), calc(100% - 2*var(--pad))); margin: 0 auto; }
+
+    /* top nav */
+    .topbar{
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+      background: color-mix(in srgb, var(--bg) 80%, transparent);
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar .wrap{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      padding: 10px 0;
+      gap: 14px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      font-weight: 750;
+      letter-spacing:.2px;
+      white-space: nowrap;
+    }
+    .brand .dot{
+      width: 12px; height: 12px;
+      border-radius: 999px;
+      background: var(--ink);
+      box-shadow: 0 0 0 4px rgba(0,0,0,.06);
+    }
+    nav ul{
+      list-style:none;
+      margin:0;
+      padding:0;
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    nav a{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: color-mix(in srgb, var(--paper) 85%, transparent);
+      box-shadow: 0 4px 10px rgba(0,0,0,.04);
+      font-size: 14px;
+    }
+    nav a:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(0,0,0,.06);
+    }
+
+    /* hero */
+    header.hero{
+      padding: clamp(26px, 4vw, 44px) 0 18px;
+    }
+    .hero-grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: clamp(14px, 2vw, 18px);
+      align-items: stretch;
+    }
+    @media (max-width: 900px){
+      .hero-grid{ grid-template-columns: 1fr; }
+    }
+    .paper{
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+    .paper:before{
+      content:"";
+      position:absolute;
+      inset:-30px;
+      border-radius: calc(var(--radius) + 22px);
+      border: 2px dashed rgba(0,0,0,.08);
+      transform: rotate(-1.2deg);
+      pointer-events:none;
+    }
+    .hero-left{ padding: var(--pad); }
+    .kicker{
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.03);
+      font-size: 13px;
+      color: var(--muted);
+      width: fit-content;
+    }
+    h1{
+      margin: 12px 0 8px;
+      font-size: clamp(26px, 3.2vw, 40px);
+      line-height: 1.1;
+      letter-spacing: -.5px;
+    }
+    .lead{
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px;
+      max-width: 62ch;
+    }
+    .chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .chip{
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.55);
+      font-size: 13px;
+    }
+
+    .hero-right{
+      display:grid;
+      grid-template-rows: auto 1fr;
+    }
+    .mini-gallery{
+      padding: 12px;
+      display:grid;
+      gap: 10px;
+    }
+    .mini-gallery .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .mini-gallery figure{
+      margin:0;
+      border-radius: 14px;
+      overflow:hidden;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.02);
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      cursor: zoom-in;
+    }
+    .mini-gallery img{
+      display:block;
+      width:100%;
+      height: 150px;
+      object-fit: cover;
+      filter: contrast(1.02) saturate(1.02);
+    }
+    .mini-gallery figcaption{
+      position:absolute;
+      left: 10px;
+      bottom: 10px;
+      background: rgba(251,248,241,.86);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: var(--muted);
+      backdrop-filter: blur(6px);
+    }
+    .note{
+      padding: 0 12px 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* section heading */
+    section{ padding: 22px 0; }
+    .sec-head{
+      display:flex;
+      align-items:flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .sec-head h2{
+      margin: 0;
+      font-size: clamp(18px, 2.2vw, 26px);
+      letter-spacing: -.2px;
+      position: relative;
+      width: fit-content;
+    }
+    .sec-head h2:after{
+      content:"";
+      position:absolute;
+      left: 0;
+      right: 0;
+      bottom: -6px;
+      height: 10px;
+      background: rgba(0,0,0,.06);
+      border-radius: 999px;
+      transform: rotate(-1deg);
+      z-index: -1;
+    }
+    .sec-head p{
+      margin:0;
+      color: var(--muted);
+      font-size: 14px;
+      max-width: 60ch;
+    }
+
+    /* tools */
+    .tools{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    @media (max-width: 980px){
+      .tools{ grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 540px){
+      .tools{ grid-template-columns: 1fr; }
+    }
+    .tool-card{
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--line);
+      background: var(--paper);
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+    }
+    .tool-card:before{
+      content:"";
+      position:absolute;
+      inset: -18px;
+      border: 2px dashed rgba(0,0,0,.07);
+      border-radius: 22px;
+      transform: rotate(.8deg);
+      pointer-events:none;
+    }
+    .tool-card .img{
+      border-radius: 14px;
+      overflow:hidden;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.03);
+      cursor: zoom-in;
+    }
+    .tool-card img{
+      width:100%;
+      height: 150px;
+      object-fit: cover;
+      display:block;
+    }
+    .tool-card h3{
+      margin: 10px 0 4px;
+      font-size: 16px;
+    }
+    .tool-card p{
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* timeline steps */
+    .steps{
+      display:grid;
+      gap: 12px;
+    }
+    .step{
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: var(--paper);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+      position: relative;
+    }
+    .step:before{
+      content:"";
+      position:absolute;
+      inset:-26px;
+      border: 2px dashed rgba(0,0,0,.07);
+      border-radius: calc(var(--radius) + 18px);
+      transform: rotate(-.9deg);
+      pointer-events:none;
+    }
+    .step-top{
+      display:flex;
+      gap: 12px;
+      padding: 14px 14px 10px;
+      align-items:flex-start;
+      flex-wrap: wrap;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width: 38px; height: 38px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.03);
+      font-weight: 800;
+    }
+    .step h3{
+      margin: 0;
+      font-size: 18px;
+    }
+    .step p{
+      margin: 6px 0 0;
+      color: var(--muted);
+      max-width: 85ch;
+    }
+    .hint-row{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .hint{
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.55);
+      color: var(--muted);
+    }
+
+    /* scroll gallery inside step */
+    .strip{
+      display:flex;
+      gap: 10px;
+      padding: 12px 14px 16px;
+      overflow:auto;
+      scroll-snap-type: x mandatory;
+      border-top: 1px solid var(--line);
+      background: linear-gradient(to bottom, rgba(0,0,0,.02), transparent);
+    }
+    .strip::-webkit-scrollbar{ height: 10px; }
+    .strip::-webkit-scrollbar-thumb{
+      background: rgba(0,0,0,.12);
+      border-radius: 999px;
+    }
+    .shot{
+      flex: 0 0 auto;
+      width: min(320px, 78vw);
+      border-radius: 16px;
+      overflow:hidden;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      scroll-snap-align: start;
+      background: rgba(0,0,0,.03);
+      cursor: zoom-in;
+      position: relative;
+    }
+    .shot img{
+      width:100%;
+      height: 190px;
+      object-fit: cover;
+      display:block;
+    }
+    .shot span{
+      position:absolute;
+      left: 10px;
+      bottom: 10px;
+      background: rgba(251,248,241,.86);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: var(--muted);
+      backdrop-filter: blur(6px);
+    }
+
+    /* footer */
+    footer{
+      padding: 24px 0 46px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .footer-card{
+      padding: var(--pad);
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: var(--paper);
+      box-shadow: var(--shadow-soft);
+    }
+
+    /* lightbox */
+    .lightbox{
+      position: fixed;
+      inset: 0;
+      display:none;
+      place-items: center;
+      background: rgba(0,0,0,.72);
+      z-index: 100;
+      padding: 18px;
+    }
+    .lightbox.open{ display:grid; }
+    .lightbox-inner{
+      width: min(1080px, 96vw);
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.2);
+      box-shadow: 0 30px 90px rgba(0,0,0,.35);
+      background: rgba(0,0,0,.2);
+      position: relative;
+    }
+    .lightbox img{
+      width:100%;
+      height: auto;
+      display:block;
+      background: #111;
+    }
+    .lb-bar{
+      position:absolute;
+      top: 10px;
+      right: 10px;
+      display:flex;
+      gap: 8px;
+    }
+    .lb-btn{
+      appearance:none;
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(0,0,0,.35);
+      color: white;
+      padding: 8px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 650;
+    }
+    .lb-btn:hover{ background: rgba(0,0,0,.5); }
+  </style>
+</head>
+
+<body>
+
+  <div class="topbar">
+    <div class="wrap">
+      <div class="brand">
+        <span class="dot" aria-hidden="true"></span>
+        <span>Székely Gate Carving</span>
+      </div>
+
+      <nav aria-label="Page navigation">
+        <ul>
+          <li><a href="#eszközök">Tools</a></li>
+          <li><a href="#anyag">Wood</a></li>
+          <li><a href="#folyamat">Process</a></li>
+          <li><a href="#galeria">Gallery</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div class="wrap hero-grid">
+      <div class="paper hero-left">
+        <!-- <div class="kicker">Carving Székely gate patterns</div> -->
+        <h1>Gate Pattern Carving</h1>
+        <p class="lead">
+          On this short tutorial page we first review the necessary tools and the wood material,
+          then step by step present the carving process:
+          from planning and sketching through driving-in the outline all the way to background removal.
+        </p>
+
+        <!-- <div class="chips" aria-label="Key info">
+          <div class="chip">Tools: wooden mallet, wood-handled chisel, metal chisel, hammer</div>
+          <div class="chip">Wood: oak / alder (easier to carve)</div>
+          <div class="chip">Tip: the pattern “starts somewhere and ends somewhere”</div>
+        </div> -->
+      </div>
+
+      <div class="paper hero-right">
+        <div class="mini-gallery" id="galeria">
+          <div class="grid" aria-label="Quick preview images">
+
+            <figure class="zoomable" data-full="KolikKepek/tutorial/IMG_0329.JPG">
+                <img src="KolikKepek/tutorial/IMG_0329.JPG" alt="Sketching the pattern onto a board" loading="lazy" />
+                <figcaption>Sketching</figcaption>
+              </figure>
+
+              <figure class="zoomable" data-full="KolikKepek/tutorial/IMG_0319.JPG">
+                <img src="KolikKepek/tutorial/IMG_0319.JPG" alt="Carving in progress on the table" loading="lazy" />
+                <figcaption>Driving-in</figcaption>
+              </figure>
+
+              <figure class="zoomable" data-full="KolikKepek/tutorial/IMG_0577.JPG">
+                <img src="KolikKepek/tutorial/IMG_0577.JPG" alt="Background removal with a chisel around the pattern" loading="lazy" />
+                <figcaption>Removal</figcaption>
+              </figure>
+
+            <figure class="zoomable" data-full="KolikKepek/tutorial/IMG_1171.JPG">
+              <img src="KolikKepek/tutorial/IMG_1171.JPG" alt="Color motif example on a carved surface" loading="lazy" />
+              <figcaption>Final result</figcaption>
+            </figure>
+
+          </div>
+        </div>
+
+        <div class="note">
+          Click the images to view them larger.
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <section id="eszközök">
+      <div class="sec-head">
+        <h2>Tools</h2>
+        <!-- <p>The basic kit: wooden mallet, wood-handled chisel, metal chisel (outliner), hammer.</p> -->
+      </div>
+
+      <div class="tools" aria-label="Tool cards">
+
+        <article class="tool-card">
+          <div class="img zoomable" data-full="KolikKepek/tutorial/IMG_0319.JPG">
+            <img src="KolikKepek/tutorial/IMG_0319.JPG" alt="Driving a metal chisel with a hammer" loading="lazy" />
+          </div>
+          <h3>Metal chisel (outliner)</h3>
+          <p>For every line you need to find the matching chisel, then drive the lines into the wood with a hammer, fixing the contour of the pattern.</p>
+        </article>
+
+        <article class="tool-card">
+          <div class="img zoomable" data-full="KolikKepek/tutorial/IMG_0317.JPG">
+            <img src="KolikKepek/tutorial/IMG_0317.JPG" alt="Striking while carving – hammer and chisel" loading="lazy" />
+          </div>
+          <h3>Hammer</h3>
+          <p>Used to drive the chisels during carving. Steel on steel.</p>
+        </article>
+        
+        <article class="tool-card">
+            <div class="img zoomable" data-full="KolikKepek/tutorial/IMG_1239.JPG">
+              <img src="KolikKepek/tutorial/IMG_1239.JPG" alt="Wooden mallet close-up" loading="lazy" />
+            </div>
+            <h3>Wooden mallet</h3>
+            <p>A wooden striking tool for “softer” hits, specifically for wood-handled chisels. Wood on wood.</p>
+          </article>
+  
+          <article class="tool-card">
+            <div class="img zoomable" data-full="KolikKepek/tutorial/IMG_1081.JPG">
+              <img src="KolikKepek/tutorial/IMG_1081.JPG" alt="Wood-handled chisel next to the workpiece" loading="lazy" />
+            </div>
+            <h3>Wood-handled chisel</h3>
+            <p>Mainly used for removing the background. Thanks to its design it’s easy to control and allows precise carving.</p>
+          </article>
+      </div>
+    </section>
+
+    <section id="anyag">
+      <div class="sec-head">
+        <h2>The piece: board</h2>
+        <!-- <p>Oak or alder. Alder is easier to carve.</p> -->
+      </div>
+
+      <div class="paper" style="padding: var(--pad);">
+        <div style="display:grid; grid-template-columns: 1.1fr .9fr; gap: 14px; align-items:start;">
+          <div>
+            <h3 style="margin:0 0 8px;">What to watch for</h3>
+            <ul style="margin:0; padding-left: 18px; color: var(--muted);">
+              <li>Make sure the wood is secured firmly (with a clamp on the table).</li>
+              <li>The pattern always “starts somewhere and ends somewhere” — give it a clear closure.</li>
+              <li>The bark edge is decorative, but while working make sure the line doesn’t “tear.”</li>
+            </ul>
+          </div>
+
+          <div class="zoomable" data-full="KolikKepek/tutorial/IMG_0541.JPG" style="border:1px solid var(--line); border-radius: 16px; overflow:hidden; box-shadow: var(--shadow-soft); cursor: zoom-in;">
+            <img src="KolikKepek/tutorial/IMG_0541.JPG" alt="Sketching the pattern on the board while holding it" loading="lazy" style="display:block; width:100%; height: 220px; object-fit: cover;">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="folyamat">
+      <div class="sec-head">
+        <h2>The process</h2>
+        <!-- <p>Step by step – with photo examples for each part.</p> -->
+      </div>
+
+      <div class="steps" aria-label="Process steps">
+
+        <!-- Step 1 -->
+        <article class="step">
+          <div class="step-top">
+            <div class="badge">1</div>
+            <div>
+              <h3>Designing the pattern</h3>
+              <p>
+                First we decide what we want to carve. It helps if the curve of the pattern “leads,” and
+                it consciously starts from something and arrives into something.
+              </p>
+              <div class="hint-row">
+                <span class="hint">tip: start with simple shapes</span>
+                <span class="hint">tip: it’s faster to iterate on paper</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="strip" aria-label="Step 1 images">
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0119.JPG">
+              <img src="KolikKepek/tutorial/IMG_0119.JPG" alt="Designing the pattern on paper with a pencil" loading="lazy" />
+              <span>Design</span>
+            </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0134_crop.png">
+              <img src="KolikKepek/tutorial/IMG_0134_crop.png" alt="Comparing the pattern drawing and a carved example" loading="lazy" />
+              <span>Pattern + example</span>
+            </figure>
+
+          </div>
+        </article>
+
+        <!-- Step 2 -->
+        <article class="step">
+          <div class="step-top">
+            <div class="badge">2</div>
+            <div>
+              <h3>Choosing the wood and sketching the pattern</h3>
+              <p>
+                We choose the board (oak/alder), then draw the pattern onto the wood.
+                It’s worth putting down the main lines “loosely” first, then refining them.
+              </p>
+              <div class="hint-row">
+                <span class="hint">tip: trace lightly, don’t scratch</span>
+                <!-- <span class="hint">tip: secure the wood so it doesn’t move</span> -->
+              </div>
+            </div>
+          </div>
+
+          <div class="strip" aria-label="Step 2 images">
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0541.JPG">
+                <img src="KolikKepek/tutorial/IMG_0541.JPG" alt="Drawing on the board while holding it" loading="lazy" />
+                <span>Line flow</span>
+              </figure>
+            <!-- <figure class="shot zoomable" data-full="images/IMG_0329.JPG">
+              <img src="KolikKepek/tutorial/IMG_0329.JPG" alt="Drawing the pattern onto the board" loading="lazy" />
+              <span>Sketching</span>
+            </figure> -->
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0278_crop.png">
+                <img src="KolikKepek/tutorial/IMG_0278_crop.png" alt="Close-up detail of the sketched pattern" loading="lazy" />
+                <span>Detail</span>
+              </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0291.JPG">
+              <img src="KolikKepek/tutorial/IMG_0291.JPG" alt="Sketched flower motif on wood" loading="lazy" />
+              <span>Sketch on wood</span>
+            </figure>
+
+
+          </div>
+        </article>
+
+        <!-- Step 3 -->
+        <article class="step">
+          <div class="step-top">
+            <div class="badge">3</div>
+            <div>
+              <h3>“Driving in” the contour with a metal chisel</h3>
+              <p>
+                With the outliner chisel (metal chisel) and a hammer we follow
+                the lines of the drawing. Here the goal is still <strong>fixing the contour</strong>.
+              </p>
+              <div class="hint-row">
+                <span class="hint">tip: short, controlled strikes</span>
+                <!-- <span class="hint">tip: slow down in curves</span> -->
+              </div>
+            </div>
+          </div>
+
+          <div class="strip" aria-label="Step 3 images">
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0319.JPG">
+              <img src="KolikKepek/tutorial/IMG_0319.JPG" alt="Driving the metal chisel into the pattern" loading="lazy" />
+              <span>Place the chisel on the line</span>
+            </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0317.JPG">
+                <img src="KolikKepek/tutorial/IMG_0317.JPG" alt="Driving the metal chisel into the pattern" loading="lazy" />
+                <span>Contour strikes</span>
+              </figure>
+          </div>
+        </article>
+
+        <!-- Step 4 -->
+        <article class="step">
+          <div class="step-top">
+            <div class="badge">4</div>
+            <div>
+              <h3>Removing with a chisel – making the pattern stand out</h3>
+              <p>
+                After the full contour is done, we “remove” the surrounding areas,
+                so the motif rises from the wood.
+              </p>
+              <div class="hint-row">
+                <!-- <span class="hint">tip: work toward the contour, not across it</span> -->
+                <span class="hint">tip: remove in layers, not deep all at once</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="strip" aria-label="Step 4 images">
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0449.JPG">
+              <img src="KolikKepek/tutorial/IMG_0449.JPG" alt="Background removal in progress on multiple pieces" loading="lazy" />
+              <span>Removal</span>
+            </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0576.JPG">
+              <img src="KolikKepek/tutorial/IMG_0576.JPG" alt="Close-up of chisel and wood chips" loading="lazy" />
+              <span>Detail</span>
+            </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0637.JPG">
+              <img src="KolikKepek/tutorial/IMG_0637.JPG" alt="Removing next to the contour" loading="lazy" />
+              <span>Along the contour</span>
+            </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0644.JPG">
+              <img src="KolikKepek/tutorial/IMG_0644.JPG" alt="Removing the background, shaping the surface" loading="lazy" />
+              <span>Background</span>
+            </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0686.JPG">
+              <img src="KolikKepek/tutorial/IMG_0686.JPG" alt="Refining the motif with a chisel" loading="lazy" />
+              <span>Refinement</span>
+            </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0577.JPG">
+              <img src="KolikKepek/tutorial/IMG_0577.JPG" alt="Pattern in progress, already raised" loading="lazy" />
+              <span>Lift</span>
+            </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0533.JPG">
+              <img src="KolikKepek/tutorial/IMG_0533.JPG" alt="Fine tuning on the surface, smoothing" loading="lazy" />
+              <span>Finishing</span>
+            </figure>
+          </div>
+        </article>
+
+        <!-- Step 5 -->
+        <article class="step">
+            <div class="step-top">
+            <div class="badge">5</div>
+            <div>
+                <h3>Motifs – the final result</h3>
+                <p>
+                  When we’ve carefully removed all areas and the pattern stands out nicely, we’re done.
+                  Optionally, the carving can be painted — as was common on old Székely gates.
+                </p>
+                <div class="hint-row">
+                  <span class="hint">Tip: paint the vines green.</span>
+                  <span class="hint">Tip: the tulip is red.</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="strip" aria-label="Step 5 images">
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_1171.JPG">
+                <img src="KolikKepek/tutorial/IMG_1171.JPG" alt="Finished carved motif (example 1)" loading="lazy" />
+                <!-- <span>Finished</span> -->
+            </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_1253.JPG">
+                <img src="KolikKepek/tutorial/IMG_1253.JPG" alt="Finished carved motif (example 2)" loading="lazy" />
+                <!-- <span>Finished</span> -->
+            </figure>
+            <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_1305.JPG">
+                <img src="KolikKepek/tutorial/IMG_1305.JPG" alt="Finished carved motif (example 3)" loading="lazy" />
+                <!-- <span>Finished</span> -->
+            </figure>
+            </div>
+        </article>
+      </div>
+    </section>
+
+    <section aria-label="Extra gallery block">
+      <div class="sec-head">
+        <h2>Extra gallery</h2>
+        <!-- <p>A few extra snapshots: tools, atmosphere, carving in progress.</p> -->
+      </div>
+
+      <div class="strip" id="galeria2">
+        <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0451.JPG">
+          <img src="KolikKepek/tutorial/IMG_0451.JPG" alt="Carving with a wooden mallet and chisel" loading="lazy" />
+          <!-- <span>Chisel</span> -->
+        </figure>
+        <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0637.JPG">
+          <img src="KolikKepek/tutorial/IMG_0637.JPG" alt="Using hammer and chisel while working" loading="lazy" />
+          <!-- <span>Striking</span> -->
+        </figure>
+        <figure class="shot zoomable" data-full="KolikKepek/tutorial/IMG_0686.JPG">
+          <img src="KolikKepek/tutorial/IMG_0686.JPG" alt="Colored pattern on a carved surface" loading="lazy" />
+          <!-- <span>Motif</span> -->
+        </figure>
+        <!-- <figure class="shot zoomable" data-full="images/IMG_1239.JPG">
+          <img src="KolikKepek/tutorial/IMG_1239.JPG" alt="Wooden mallet close-up on the table" loading="lazy" />
+          <span>Wooden mallet</span>
+        </figure> -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <div class="lightbox-inner" role="dialog" aria-label="View image">
+      <div class="lb-bar">
+        <button class="lb-btn" id="lbClose" type="button">Close</button>
+      </div>
+      <img id="lbImg" alt="" />
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const lb = document.getElementById('lightbox');
+      const lbImg = document.getElementById('lbImg');
+      const lbClose = document.getElementById('lbClose');
+
+      function openLB(src, alt){
+        lbImg.src = src;
+        lbImg.alt = alt || '';
+        lb.classList.add('open');
+        lb.setAttribute('aria-hidden','false');
+      }
+      function closeLB(){
+        lb.classList.remove('open');
+        lb.setAttribute('aria-hidden','true');
+        lbImg.src = '';
+        lbImg.alt = '';
+      }
+
+      document.querySelectorAll('.zoomable').forEach(el => {
+        el.addEventListener('click', () => {
+          const src = el.getAttribute('data-full');
+          const img = el.querySelector('img');
+          openLB(src, img ? img.alt : '');
+        });
+        el.addEventListener('keydown', (e) => {
+          if(e.key === 'Enter' || e.key === ' ') el.click();
+        });
+        el.tabIndex = 0;
+        el.style.outline = 'none';
+      });
+
+      lb.addEventListener('click', (e) => {
+        if(e.target === lb) closeLB();
+      });
+      lbClose.addEventListener('click', closeLB);
+      window.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape' && lb.classList.contains('open')) closeLB();
+      });
+    })();
+  </script>
+
+</body>
+</html>
